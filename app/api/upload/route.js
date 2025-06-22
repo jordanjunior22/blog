@@ -1,11 +1,10 @@
-// app/api/upload/route.js
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import os from 'os';
 import uploadImage from '@/utils/uploadImage';
 import verifyUser from '@/utils/VerifyUser';
 
-// Disable Next.js default body parser
 export const config = {
   api: {
     bodyParser: false,
@@ -13,28 +12,26 @@ export const config = {
 };
 
 export async function POST(request) {
-    const user = await verifyUser(request, ['admin','reader']);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  // Prepare a temp directory
-  const tempDir = path.join(process.cwd(), 'public', 'uploads');
+  const user = await verifyUser(request, ['admin', 'reader']);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // ✅ Use OS temporary directory instead of /public/uploads
+  const tempDir = path.join(os.tmpdir(), 'uploads');
   await fs.mkdir(tempDir, { recursive: true });
 
   try {
-    // Parse the multipart form
     const formData = await request.formData();
-    const file = formData.get('image'); // input name="image"
+    const file = formData.get('image');
     if (!file || typeof file === 'string') {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    // Read file buffer
     const buffer = Buffer.from(await file.arrayBuffer());
     const tmpPath = path.join(tempDir, `${Date.now()}-${file.name}`);
     await fs.writeFile(tmpPath, buffer);
 
-    // Upload via your util
     const result = await uploadImage(tmpPath);
 
     return NextResponse.json({ url: result.url });
@@ -42,7 +39,7 @@ export async function POST(request) {
     console.error('Upload error', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   } finally {
-    // Clean up any files in tempDir older than this request
+    // Clean up temporary files
     try {
       const files = await fs.readdir(tempDir);
       for (const fname of files) {
@@ -50,6 +47,8 @@ export async function POST(request) {
           await fs.unlink(path.join(tempDir, fname));
         }
       }
-    } catch {} // ignore cleanup errors
+    } catch {
+      // Ignore cleanup errors
+    }
   }
 }
