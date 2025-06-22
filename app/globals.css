@@ -1,9 +1,22 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --cta-color : #6B38FF;
+    --font-nunito: 'Nunito', sans-serif;
+
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --foreground: #ededed;
+    --cta-color : #6B38FF;
+  }
+}
+
 
 @theme inline {
   --color-background: var(--background);
@@ -12,15 +25,40 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+nav::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+nav:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+  background-size: 200% 100%;
 }
