@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 const User = require('@/models/User');
 const bcrypt = require('bcryptjs');
-const connectDB = require('@/lib/db');
+const connectDB = require('@/utils/connectDB');
 
 export async function POST(req) {
   await connectDB();

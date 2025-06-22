@@ -1,4 +1,4 @@
-const connectDB = require('@/lib/connectDB');
+const connectDB = require('@/utils/connectDB');
 const Tag = require('@/models/Tag');
 
 export async function GET() {
