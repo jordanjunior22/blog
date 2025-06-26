@@ -12,7 +12,7 @@ const handleSubmit = async (e) => {
   setSubmitting(true);
 
   try {
-    const res = await fetch('/api/subscriber', {
+    const res = await fetch('/api/subscribers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),

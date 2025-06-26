@@ -5,7 +5,7 @@ import Post from '@/models/Post';
 export async function PATCH(request, { params }) {
   await connectDB();
   const { id } = await params;
-  const user = await verifyUser(request, ['user', 'admin']);
+  const user = await verifyUser(request, ['reader', 'admin']);
   
   if (!user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
