@@ -89,11 +89,11 @@ function Latest() {
 
                         {/* Pagination controls */}
                         {/* Pagination */}
-                        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm md:text-base">
+                        <div className="flex text-black dark:text-white flex-col sm:flex-row justify-center items-center gap-4 text-sm md:text-base">
                             <button
                                 onClick={goToPrevPage}
                                 disabled={currentPage === 1}
-                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
+                                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 cursor-pointer hover:text-white hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
                             >
                                 Prev
                             </button>
@@ -105,7 +105,7 @@ function Latest() {
                             <button
                                 onClick={goToNextPage}
                                 disabled={currentPage === totalPages}
-                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
+                                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 cursor-pointer hover:text-white hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
                             >
                                 Next
                             </button>

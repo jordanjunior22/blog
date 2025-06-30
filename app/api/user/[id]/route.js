@@ -17,7 +17,7 @@ export async function PUT(req) {
   }
   await connectDB();
   const body = await req.json();
-  
+  console.log(body);
   try {
     const { _id, name, email, avatarUrl,bio, bioTitle,links } = body;
     if (!_id) {
@@ -40,16 +40,19 @@ export async function PUT(req) {
   }
 }
 
-export async function DELETE(_, { params }) {
-  const user = await verifyUser(request, ['admin', 'reader']);
+export async function DELETE(request, { params }) {
+  const user = await verifyUser(request, ['admin']);
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   await connectDB();
+
   try {
     await User.findByIdAndDelete(params.id);
-    return Response.json({ message: 'User deleted' });
+    return Response.json({ success: true, message: 'User deleted' });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 400 });
   }
 }
+

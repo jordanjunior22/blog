@@ -25,6 +25,7 @@ export default function ReaderSettingsPage() {
     }
 
     setForm({
+      id: user.id || '',
       name: user.name || '',
       avatarUrl: user.avatarUrl || '',
       currentPassword: '',
@@ -32,6 +33,7 @@ export default function ReaderSettingsPage() {
     });
   }, [user]);
 
+  console.log('User:', user);
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -60,15 +62,23 @@ export default function ReaderSettingsPage() {
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/user/${user._id}`, {
+
+    if (!user?.id) {
+      alert('User ID is missing');
+      return;
+    }
+
+    const res = await fetch(`/api/user/${user.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, _id: user._id }),
+      body: JSON.stringify({ ...form, _id: user.id }),
     });
+
     const json = await res.json();
     if (json.success) alert('Profile updated');
     else alert(json.error || 'Update failed');
   };
+
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
@@ -83,9 +93,19 @@ export default function ReaderSettingsPage() {
     });
     const json = await res.json();
     if (json.success) {
-      alert('Password updated');
-      router.push('/logout');
-    } else alert(json.error || 'Reset failed');
+      alert('Password updated. You’ll be logged out for security.');
+
+      // 🔒 Log the user out
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      // 🔁 Redirect to login
+      router.push('/login');
+    } else {
+      alert(json.error || 'Reset failed');
+    }
   };
 
   if (!user) {

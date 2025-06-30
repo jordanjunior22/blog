@@ -6,14 +6,14 @@ import Footer from '@/components/Footer';
 
 
 export const metadata = {
-  title: 'Philosophic',
+  title: 'Chest of Contemplation',
   description: 'Exploring Life’s Depths through Words',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body >
         <UserProvider>
           <Navigation />
           {children}

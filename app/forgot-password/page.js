@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-100 text-sm">
+    <div className="min-h-screen flex items-center text-black justify-center px-4 bg-gray-100 text-sm">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 space-y-6">
         <div className="text-center">
           <MailCheck className="mx-auto h-12 w-12 text-blue-600" />

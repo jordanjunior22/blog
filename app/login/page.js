@@ -6,7 +6,7 @@ import { useUser } from "@/context/userContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, setUser } = useUser();
+  const { setUser } = useUser(); // We only need setUser here
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -16,36 +16,43 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-
-  if (res.ok) {
-    const data = await res.json();
-    setUser(data); // 💡 this triggers the avatar to show up
-    router.push("/");    // navigate to homepage
-  } 
-
-    router.push('/'); // redirect
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      // Check if the response is OK (status 200-299)
+      if (res.ok) {
+        const data = await res.json();
+        // IMPORTANT: Ensure you are setting the *actual* user object
+        // If your API returns { success: true, user: {...} }, then use data.user
+        // If your API returns {...} directly as the user, then use data
+        setUser(data.user); // <--- ASSUMING your API returns { user: {...} }
+        router.push("/"); // Navigate to homepage ONLY on successful login
+      } else {
+        // Handle API errors (e.g., 401 Unauthorized, 400 Bad Request)
+        const errorData = await res.json();
+        setError(errorData.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      // Handle network errors or other unexpected issues
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="max-w-md mx-auto m-16 p-6 bg-gray-100 rounded-md shadow">
+    <div className="max-w-md mx-auto m-16 p-6 bg-gray-100 text-black rounded-md shadow">
       <h1 className="text-lg mb-6 text-center">Welcome Back, Login</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">

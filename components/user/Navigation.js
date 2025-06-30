@@ -1,13 +1,14 @@
+// components/Navigation.js
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
 import Button from "../Button";
-import { useUser } from "@/context/userContext";
+import { useUser } from "@/context/userContext"; // Assuming this path
 import { useRouter } from "next/navigation";
 
 function Navigation() {
   const router = useRouter();
-  const { user, setUser } = useUser();
+  const { user, setUser, loading } = useUser(); // Destructure loading state
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -44,11 +45,9 @@ function Navigation() {
         className="w-full py-2 px-6 flex justify-end items-center text-sm bg-[#0a1526] text-white"
         style={{ fontFamily: "system-ui, sans-serif" }}
       >
-        {!user && (
-          <a
-            href="/login"
-            className="hover:underline"
-          >
+        {/* Conditionally render Login/Avatar based on loading and user state */}
+        {!loading && !user && (
+          <a href="/login" className="hover:underline">
             Login
           </a>
         )}
@@ -63,7 +62,7 @@ function Navigation() {
         }}
       >
         {/* Logo */}
-        <div className="text-2xl font-bold">Philosorphic</div>
+        <div className="text-2xl font-bold">Chest of Contemplation </div>
 
         {/* Hamburger for Mobile */}
         <div className="md:hidden">
@@ -117,12 +116,16 @@ function Navigation() {
 
             <Button
               text="Subscribe"
-              type="button"
-              onClick={() => alert("Subscribe clicked!")}
+              href="/#subscribe"
+              style={{
+                backgroundColor: "var(--cta-color)",
+                color: "var(--foreground)",
+              }}
             />
 
             {/* User Avatar & Dropdown */}
-            {user && (
+            {/* Render avatar only when not loading and user data is available */}
+            {!loading && user && (
               <div className="relative ml-4" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -136,13 +139,12 @@ function Navigation() {
                   />
                 </button>
 
-
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-50">
+                  <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-500 dark:text-black border rounded-md shadow-lg z-50">
                     <ul>
                       {user.role === "admin" ? (
                         <li
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="px-4 py-2 hover:bg-gray-600 cursor-pointer "
                           onClick={() => {
                             router.push("/admin");
                             setDropdownOpen(false);
@@ -152,7 +154,7 @@ function Navigation() {
                         </li>
                       ) : (
                         <li
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="px-4 py-2 hover:bg-gray-600 cursor-pointer"
                           onClick={() => {
                             router.push("/settings");
                             setDropdownOpen(false);
@@ -170,7 +172,6 @@ function Navigation() {
                     </ul>
                   </div>
                 )}
-
               </div>
             )}
           </div>
@@ -201,8 +202,7 @@ function Navigation() {
               <Search className="w-5 h-5 cursor-pointer" />
               <Button
                 text="Subscribe"
-                type="button"
-                onClick={() => alert("Subscribe clicked!")}
+                href="/subscribe"
                 style={{
                   backgroundColor: "var(--cta-color)",
                   color: "var(--foreground)",

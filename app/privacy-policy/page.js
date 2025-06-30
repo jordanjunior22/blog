@@ -3,14 +3,14 @@ import React from 'react';
 
 const PrivacyPolicyPage = () => {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 text-gray-800 text-sm">
+    <div className="max-w-3xl mx-auto px-4 py-12 text-gray-800 text-sm dark:text-gray-200">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
 
       <p className="mb-4">Last updated: 2025-06-23</p>
 
       <p className="mb-6">
-        Welcome to [Your Blog Name] ("we", "our", "us"). Your privacy is important to us. This Privacy Policy
-        explains how we collect, use, and protect your information when you visit our blog at [yourdomain.com].
+        Welcome to Chest of Contemplation ("we", "our", "us"). Your privacy is important to us. This Privacy Policy
+        explains how we collect, use, and protect your information when you visit our blog at http://chestofcontemplation.com
       </p>
 
       <h2 className="text-xl font-semibold mt-8 mb-2">1. Information We Collect</h2>
@@ -63,7 +63,7 @@ const PrivacyPolicyPage = () => {
       <h2 className="text-xl font-semibold mt-8 mb-2">9. Contact Us</h2>
       <p className="mb-4">
         If you have any questions about this Privacy Policy, contact us at:{' '}
-        <strong>[your-email@example.com]</strong>
+        <strong>http://chestofcontemplation.com</strong>
       </p>
     </div>
   );

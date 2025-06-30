@@ -25,7 +25,7 @@ export default function AdminHome() {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div>
+    <div className=''>
       <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 min-h-[200px]">
         {stats
