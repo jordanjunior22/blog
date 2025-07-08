@@ -57,10 +57,15 @@ function PostCart({ post }) {
         </div>
 
         {/* Post Title */}
-        <h2 className="text-lg font-bold text-gray-900">{post.title}</h2>
+        <h2 className="text-lg font-bold text-gray-900"
+        style={{ fontFamily: 'var(--font-playfair)' }}>
+          {post.title}
+        </h2>
 
         {/* Post Excerpt */}
-        <p className="text-gray-700 text-sm mt-2">
+        <p className="text-gray-700 text-sm mt-2"
+        style={{ fontFamily: 'var(--font-roboto)' }}
+        >
           {post.content?.length > 200
             ? post.content.slice(0, 200) + '...'
             : post.content}
