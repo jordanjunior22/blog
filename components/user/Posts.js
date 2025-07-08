@@ -63,7 +63,7 @@ const PostPage = ({ post }) => {
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+      <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair)' }}>{post.title}</h1>
 
       {post.coverImage && (
         <img
@@ -103,6 +103,7 @@ const PostPage = ({ post }) => {
 
       <div
         className="prose prose-lg whitespace-pre-wrap mb-6"
+        style={{ fontFamily: 'var(--font-roboto)' }}
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
     </div>
