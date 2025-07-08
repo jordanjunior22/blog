@@ -64,8 +64,12 @@ export default function Featured() {
 
       <div className="flex-1 space-y-4">
         <p className="text-sm text-(--cta-color)">Featured Writing</p>
-        <h1 className="text-2xl md:text-3xl font-bold">{post.title}</h1>
-        <p className="text-gray-700 whitespace-pre-line">
+        <h1 className="text-2xl md:text-3xl font-bold"
+        style={{ fontFamily: 'var(--font-playfair)' }}
+        >{post.title}</h1>
+        <p className="text-gray-700 whitespace-pre-line"
+        style={{ fontFamily: 'var(--font-roboto)' }}
+        >
           {post.content?.length > 200 ? post.content.slice(0, 200) + '...' : post.content}
         </p>
 

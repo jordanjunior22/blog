@@ -2,6 +2,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
+import Link from 'next/link';
 import Button from "../Button";
 import { useUser } from "@/context/userContext"; // Assuming this path
 import { useRouter } from "next/navigation";
@@ -62,8 +63,9 @@ function Navigation() {
         }}
       >
         {/* Logo */}
-        <div className="text-2xl font-bold">Chest of Contemplation </div>
-
+        <Link href="/" className="text-2xl font-bold">
+          Chest of Contemplation
+        </Link>
         {/* Hamburger for Mobile */}
         <div className="md:hidden">
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
