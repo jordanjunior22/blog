@@ -181,38 +181,83 @@ function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div
-            className="absolute top-full left-0 w-full flex flex-col items-start gap-4 p-6 bg-white shadow md:hidden"
-            style={{
-              backgroundColor: "var(--background)",
-              color: "var(--foreground)",
+  <div
+    className="absolute top-full left-0 w-full flex flex-col gap-4 p-6 bg-white shadow md:hidden z-[999]"
+    style={{
+      backgroundColor: "var(--background)",
+      color: "var(--foreground)",
+    }}
+  >
+    <a href="/" className="hover:opacity-80 transition w-full">
+      Home
+    </a>
+    <a href="/blog" className="hover:opacity-80 transition w-full">
+      Blog
+    </a>
+    <a href="/contact" className="hover:opacity-80 transition w-full">
+      Contact
+    </a>
+    <a href="/about" className="hover:opacity-80 transition w-full">
+      About
+    </a>
+
+    <div className="flex items-center justify-between w-full mt-4">
+      <Search className="w-5 h-5 cursor-pointer" />
+      <Button
+        text="Subscribe"
+        href="/subscribe"
+        style={{
+          backgroundColor: "var(--cta-color)",
+          color: "var(--foreground)",
+        }}
+      />
+    </div>
+
+    {/* Mobile user menu */}
+    {!loading && user && (
+      <div className="flex flex-col gap-2 pt-4 border-t mt-4">
+        <div className="flex items-center gap-3">
+          <img
+            src={user.avatarUrl || "/default.webp"}
+            alt={user.name || "User Avatar"}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <span className="text-sm font-medium">{user.name}</span>
+        </div>
+
+        {user.role === "admin" ? (
+          <button
+            onClick={() => {
+              router.push("/admin");
+              setMobileMenuOpen(false);
             }}
+            className="text-left text-sm px-2 py-1 hover:bg-gray-100 rounded"
           >
-            <a href="/" className="hover:opacity-80 transition w-full">
-              Home
-            </a>
-            <a href="/blog" className="hover:opacity-80 transition w-full">
-              Blog
-            </a>
-            <a href="/contact" className="hover:opacity-80 transition w-full">
-              Contact
-            </a>
-            <a href="/about" className="hover:opacity-80 transition w-full">
-              About
-            </a>
-            <div className="flex items-center justify-between w-full mt-4">
-              <Search className="w-5 h-5 cursor-pointer" />
-              <Button
-                text="Subscribe"
-                href="/subscribe"
-                style={{
-                  backgroundColor: "var(--cta-color)",
-                  color: "var(--foreground)",
-                }}
-              />
-            </div>
-          </div>
+            Admin Panel
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              router.push("/settings");
+              setMobileMenuOpen(false);
+            }}
+            className="text-left text-sm px-2 py-1 hover:bg-gray-100 rounded"
+          >
+            Settings
+          </button>
         )}
+
+        <button
+          onClick={handleLogout}
+          className="text-left text-sm px-2 py-1 hover:bg-gray-100 rounded text-red-600"
+        >
+          Logout
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
       </nav>
     </>
   );
