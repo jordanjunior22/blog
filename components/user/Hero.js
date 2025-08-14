@@ -13,7 +13,7 @@ export default function Hero() {
 
             <div className="relative z-10 text-center max-w-4xl text-center">
                 <h1 className="text-4xl md:text-7xl  mb-6">
-                    Exploring Life’s through <span className='text-(--cta-color) font-bold'>Depths</span> through <span className='text-(--cta-color) font-bold'>Words</span> 
+                    Exploring Life’s <span className='text-(--cta-color) font-bold'>Depths</span> through <span className='text-(--cta-color) font-bold'>Words</span> 
                 </h1>
                 <p className="text-lg md:text-xl px-2 mb-8">
                     A collection of philosophical  poetry and timeless maxims that illuminate the human experience
