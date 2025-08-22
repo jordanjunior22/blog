@@ -55,7 +55,7 @@ function Footer() {
         <div className="max-w-xs md:mb-0">
           <h3 className="font-bold mb-2.5 text-lg">Chest of Contemplation</h3>
           <p className="leading-relaxed">
-            Exploring the depths of human thought through poetic wisdom and philosophical inquiry.
+            Ploughing the depths of human thought through poetic wisdom and philosophical inquiry...
           </p>
           <p className="mt-5 leading-relaxed text-[#8c8f98] whitespace-pre-line text-sm">
             chestofcontemplation@gmail.com
