@@ -191,7 +191,7 @@ function CommentCard({
 
 
       <section
-        className="prose prose-sm max-w-none mb-3 text-gray-700"
+        className="prose prose-sm max-w-none mb-3 text-gray-700 text-sm"
         dangerouslySetInnerHTML={{ __html: marked(comment.content || '') }}
       />
 
