@@ -102,7 +102,7 @@ const PostPage = ({ post }) => {
       </div>
 
       <div
-        className="prose prose-lg whitespace-pre-wrap mb-6"
+        className="prose prose-lg whitespace-pre-wrap mb-6 text-sm"
         style={{ fontFamily: 'var(--font-roboto)' }}
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
