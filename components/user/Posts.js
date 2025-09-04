@@ -69,7 +69,7 @@ const PostPage = ({ post }) => {
         <img
           src={post.coverImage}
           alt={post.title}
-          className="w-full h-[400px] object-cover rounded-lg mb-6"
+          className="w-full object-cover mb-6"
         />
       )}
 
