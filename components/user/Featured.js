@@ -56,7 +56,7 @@ export default function Featured() {
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-10 px-6 py-10 md:px-20 md:py-20 items-center">
       
       {/* Image */}
-      <div className="flex-1 h-64 md:h-96 lg:h-[450px] bg-gray-200 rounded-md overflow-hidden">
+      <div className="flex-1 rounded-md overflow-hidden">
         <img
           src={post.coverImage || '/featured.jpg'}
           alt={post.title}
