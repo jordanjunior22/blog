@@ -60,7 +60,7 @@ export default function Featured() {
         <img
           src={post.coverImage || '/featured.jpg'}
           alt={post.title}
-          className="w-full h-full object-contain md:object-cover object-center"
+          className="w-full h-48 object-cover"
         />
       </div>
 
