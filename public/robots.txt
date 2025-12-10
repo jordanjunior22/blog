@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Block search result pages (avoid SEO penalties)
+Disallow: /search
+
+# Block API routes (no SEO value)
+Disallow: /api/
+
+# Block server-only files
+Disallow: /_next/
+Disallow: /private/
+
+# Allow important assets
+Allow: /_next/static/
+Allow: /_next/image/
+
+# Sitemap
+Sitemap: https://chestofcontemplation.com/sitemap.xml
+
+# Host (optional but beneficial for some crawlers)
+Host: https://chestofcontemplation.com
