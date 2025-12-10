@@ -3,42 +3,17 @@
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import { useUser } from '@/context/userContext';
-import { Loader2 } from 'lucide-react';
+import { 
+  Loader2, 
+  MessageSquare, 
+  Send, 
+  User,
+  Reply,
+  X,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-// Reusable Button component with your style logic
-function Button({
-  isCustom = false,
-  className,
-  style,
-  disabled = false,
-  children,
-  ...props
-}) {
-
-  return (
-    <button
-      {...props}
-      disabled={disabled}
-      className={
-        isCustom
-          ? className
-          : `px-4 py-2 text-sm text-background transition cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
-          }`
-      }
-      style={
-        isCustom
-          ? style
-          : {
-            backgroundColor: 'var(--cta-color)',
-            borderRadius: '20px',
-            ...style,
-          }
-      }
-    >
-      {children}
-    </button>
-  );
-}
 
 export default function PostComments({ postId }) {
   const [comments, setComments] = useState([]);
@@ -46,8 +21,14 @@ export default function PostComments({ postId }) {
   const [replyContent, setReplyContent] = useState('');
   const [newCommentContent, setNewCommentContent] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
   const { user } = useUser();
-  const router = useRouter(); 
+  const router = useRouter();
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   useEffect(() => {
     fetchComments();
@@ -59,16 +40,20 @@ export default function PostComments({ postId }) {
       const data = await res.json();
       const nested = nestComments(data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
       setComments(nested);
-      console.log('Fetched comments:', nested);
     } catch (err) {
       console.error('Failed to fetch comments', err);
+      showNotification('error', 'Failed to load comments');
     }
   }
 
   async function submitComment() {
-    if (!newCommentContent.trim()) return;
+    if (!newCommentContent.trim()) {
+      showNotification('error', 'Comment cannot be empty');
+      return;
+    }
     if (!user) {
-      alert('Please login to comment');
+      showNotification('error', 'Please login to comment');
+      router.push('/login');
       return;
     }
     setLoading(true);
@@ -86,16 +71,22 @@ export default function PostComments({ postId }) {
       if (!res.ok) throw new Error('Failed to post comment');
       await fetchComments();
       setNewCommentContent('');
+      showNotification('success', 'Comment posted successfully!');
     } catch (err) {
       console.error(err);
+      showNotification('error', 'Failed to post comment');
     }
     setLoading(false);
   }
 
   async function submitReply(parentId) {
-    if (!replyContent.trim()) return;
+    if (!replyContent.trim()) {
+      showNotification('error', 'Reply cannot be empty');
+      return;
+    }
     if (!user) {
-      router.push('/login'); // ✅ redirect to login
+      showNotification('error', 'Please login to reply');
+      router.push('/login');
       return;
     }
     setLoading(true);
@@ -114,45 +105,147 @@ export default function PostComments({ postId }) {
       await fetchComments();
       setReplyingTo(null);
       setReplyContent('');
+      showNotification('success', 'Reply posted successfully!');
     } catch (err) {
       console.error(err);
+      showNotification('error', 'Failed to post reply');
     }
     setLoading(false);
   }
 
   return (
-    <section className="p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl mb-6 text-gray-900 border-b pb-2">Comments</h2>
-      <p className='text-sm'>Leave a comment</p>
-      <textarea
-        className="w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none p-3 mb-4 resize-none text-gray-800 placeholder-gray-400 transition-shadow duration-300"
-        rows={4}
-        placeholder="Write your comment here..."
-        value={newCommentContent}
-        onChange={(e) => setNewCommentContent(e.target.value)}
-        disabled={loading}
-      />
-      <Button onClick={submitComment} disabled={loading}>
-        {loading ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : null}
-        {loading ? 'Posting...' : 'Post Comment'}
-      </Button>
+    <section className="relative">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-2xl animate-slide-in max-w-md ${
+          notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white`}>
+          {notification.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span className="font-medium text-sm">{notification.message}</span>
+        </div>
+      )}
 
-      <div className="mt-8 space-y-6">
-        {comments.length === 0 && (
-          <p className="text-gray-500 italic text-center">No comments yet. Be the first to share your thoughts!</p>
-        )}
-        {comments.map((comment) => (
-          <CommentCard
-            key={comment._id}
-            comment={comment}
-            replyingTo={replyingTo}
-            setReplyingTo={setReplyingTo}
-            replyContent={replyContent}
-            setReplyContent={setReplyContent}
-            submitReply={submitReply}
-            loading={loading}
-          />
-        ))}
+      {/* Animations */}
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl shadow-lg">
+            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+              Comments
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+              {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
+            </p>
+          </div>
+        </div>
+
+        {/* New Comment Form */}
+        <div className="mb-8">
+          <div className="flex items-start gap-3 sm:gap-4">
+            {user ? (
+              <img
+                src={user.avatarUrl || '/default.webp'}
+                alt={user.name}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-gray-200 shadow-sm flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              </div>
+            )}
+            <div className="flex-1">
+              <textarea
+                className="w-full rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:outline-none p-3 sm:p-4 resize-none text-sm sm:text-base text-gray-800 placeholder-gray-400 transition-all"
+                rows={4}
+                placeholder={user ? "Share your thoughts..." : "Please login to comment"}
+                value={newCommentContent}
+                onChange={(e) => setNewCommentContent(e.target.value)}
+                disabled={loading || !user}
+              />
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-gray-500">
+                  {newCommentContent.length} characters
+                </p>
+                <button
+                  onClick={submitComment}
+                  disabled={loading || !user || !newCommentContent.trim()}
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Posting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Post Comment
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Comments List */}
+        <div className="space-y-4 sm:space-y-6">
+          {comments.length === 0 ? (
+            <div className="text-center py-12 sm:py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full mb-4">
+                <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No comments yet</h3>
+              <p className="text-sm sm:text-base text-gray-600">Be the first to share your thoughts!</p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <CommentCard
+                key={comment._id}
+                comment={comment}
+                replyingTo={replyingTo}
+                setReplyingTo={setReplyingTo}
+                replyContent={replyContent}
+                setReplyContent={setReplyContent}
+                submitReply={submitReply}
+                loading={loading}
+                user={user}
+              />
+            ))
+          )}
+        </div>
       </div>
     </section>
   );
@@ -166,66 +259,123 @@ function CommentCard({
   setReplyContent,
   submitReply,
   loading,
+  user,
+  depth = 0
 }) {
+  const isReplying = replyingTo === comment._id;
+
   return (
-    <article className="bg-gray-50 rounded-lg p-5 shadow-lg ml-4">
-      <header className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-3">
+    <article className={`animate-fade-in ${depth > 0 ? 'ml-4 sm:ml-8 md:ml-12' : ''}`}>
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+        {/* Comment Header */}
+        <header className="flex items-start gap-3 mb-3">
           <img
             src={comment.author?.avatarUrl || '/default.webp'}
             alt={comment.author?.name || 'User'}
-            className="w-8 h-8 rounded-full object-cover shadow-sm"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-sm border-2 border-white flex-shrink-0"
           />
-          <h3 className="text-sm font-bold text-gray-900">
-            {comment.author?.name || 'Anonymous'}
-          </h3>
-        </div>
-        <time
-          className="text-xs text-gray-400 whitespace-nowrap"
-          dateTime={comment.createdAt}
-          title={new Date(comment.createdAt).toLocaleString()}
-        >
-          {new Date(comment.createdAt).toLocaleDateString()}
-        </time>
-      </header>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm sm:text-base font-bold text-gray-900">
+                {comment.author?.name || 'Anonymous'}
+              </h3>
+              {comment.author?.role === 'admin' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                  Admin
+                </span>
+              )}
+            </div>
+            <time
+              className="text-xs text-gray-500"
+              dateTime={comment.createdAt}
+              title={new Date(comment.createdAt).toLocaleString()}
+            >
+              {getTimeAgo(new Date(comment.createdAt))}
+            </time>
+          </div>
+        </header>
 
+        {/* Comment Content */}
+        <section
+          className="prose prose-sm sm:prose-base max-w-none mb-3 text-gray-700 pl-0 sm:pl-[52px]"
+          dangerouslySetInnerHTML={{ __html: marked(comment.content || '') }}
+        />
 
-      <section
-        className="prose prose-sm max-w-none mb-3 text-gray-700 text-sm"
-        dangerouslySetInnerHTML={{ __html: marked(comment.content || '') }}
-      />
-
-      <button
-        onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
-        className="text-blue-600 text-sm font-medium hover:underline focus:outline-none"
-      >
-        {replyingTo === comment._id ? 'Cancel' : 'Reply'}
-      </button>
-
-      {replyingTo === comment._id && (
-        <div className="mt-3">
-          <textarea
-            className="w-full rounded-md border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none mb-2"
-            rows={3}
-            placeholder="Write a reply..."
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            disabled={loading}
-          />
-          <Button
-            onClick={() => submitReply(comment._id)}
-            disabled={loading}
-            className="inline-flex items-center text-sm px-4 py-1 rounded-md shadow"
-            style={{ backgroundColor: 'var(--cta-color)' }}
+        {/* Reply Button */}
+        <div className="pl-0 sm:pl-[52px]">
+          <button
+            onClick={() => setReplyingTo(isReplying ? null : comment._id)}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors"
           >
-            {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-            {loading ? 'Replying...' : 'Submit Reply'}
-          </Button>
+            {isReplying ? (
+              <>
+                <X className="w-4 h-4" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Reply className="w-4 h-4" />
+                Reply
+              </>
+            )}
+          </button>
         </div>
-      )}
 
+        {/* Reply Form */}
+        {isReplying && (
+          <div className="mt-4 pl-0 sm:pl-[52px] animate-fade-in">
+            <div className="flex items-start gap-3">
+              {user ? (
+                <img
+                  src={user.avatarUrl || '/default.webp'}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-gray-400" />
+                </div>
+              )}
+              <div className="flex-1">
+                <textarea
+                  className="w-full rounded-lg border-2 border-gray-200 p-3 text-sm focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:outline-none resize-none transition-all"
+                  rows={3}
+                  placeholder="Write a reply..."
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  disabled={loading}
+                />
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-gray-500">
+                    {replyContent.length} characters
+                  </p>
+                  <button
+                    onClick={() => submitReply(comment._id)}
+                    disabled={loading || !replyContent.trim()}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Replying...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Submit Reply
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Nested Replies */}
       {comment.replies?.length > 0 && (
-        <div className="mt-5 pl-6 border-l-2 border-blue-200">
+        <div className="mt-4 space-y-4 pl-0 sm:pl-6 border-l-2 border-purple-200">
           {comment.replies.map((reply) => (
             <CommentCard
               key={reply._id}
@@ -236,6 +386,8 @@ function CommentCard({
               setReplyContent={setReplyContent}
               submitReply={submitReply}
               loading={loading}
+              user={user}
+              depth={depth + 1}
             />
           ))}
         </div>
@@ -244,7 +396,7 @@ function CommentCard({
   );
 }
 
-// Utilities (same as admin)
+// Utilities
 function nestComments(comments) {
   const map = {};
   const roots = [];
@@ -263,4 +415,26 @@ function nestComments(comments) {
   });
 
   return roots;
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  const intervals = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60
+  };
+  
+  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+    const interval = Math.floor(seconds / secondsInUnit);
+    if (interval >= 1) {
+      return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
+    }
+  }
+  
+  return 'Just now';
 }

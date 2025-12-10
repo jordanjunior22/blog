@@ -1,46 +1,76 @@
-const connectDB = require('@/utils/connectDB');
-const Category = require('@/models/Category');
+import { NextResponse } from 'next/server';
+import connectDB from '@/utils/connectDB';
+import Category from '@/models/Category';
 import verifyUser from '@/utils/VerifyUser';
 
 export async function GET(_, { params }) {
-  await connectDB();
-  const { id } = await params;
-  const category = await Category.findById(id);
-  if (!category) return Response.json({ error: 'Not found' }, { status: 404 });
-  return Response.json(category);
+  try {
+    await connectDB();
+    const { id } = await params;
+    const category = await Category.findById(id);
+    
+    if (!category) {
+      return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json(category);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 export async function PUT(request, { params }) {
-  const user = await verifyUser(request, ['admin']);
-  const { id } = await params;
-  if (!user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  await connectDB();
-  const updates = await request.json();
-  console.log(updates)
-
   try {
-    const updated = await Category.findByIdAndUpdate(id, updates, { new: true });
-    if (!updated) return Response.json({ error: 'Not found' }, { status: 404 });
-    return Response.json(updated);
+    const user = await verifyUser(request, ['admin']);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    await connectDB();
+    const { id } = await params;
+    const updates = await request.json();
+    
+    const updated = await Category.findByIdAndUpdate(id, updates, { 
+      new: true,
+      runValidators: true 
+    });
+    
+    if (!updated) {
+      return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json(updated);
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 400 });
+    // Handle unauthorized error from verifyUser
+    if (err.message === 'Unauthorized: No token cookie found' || err.status === 401) {
+      return NextResponse.json({ error: 'Unauthorized: Please login' }, { status: 401 });
+    }
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
 
 export async function DELETE(request, { params }) {
-
-  const user = await verifyUser(request, ['admin']);
-  if (!user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  await connectDB();
-
   try {
-    await Category.findByIdAndDelete(params.id);
-    return Response.json({ message: 'Category deleted' });
+    const user = await verifyUser(request, ['admin']);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    await connectDB();
+    const { id } = await params;
+    
+    const deleted = await Category.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json({ message: 'Category deleted successfully' });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 400 });
+    // Handle unauthorized error from verifyUser
+    if (err.message === 'Unauthorized: No token cookie found' || err.status === 401) {
+      return NextResponse.json({ error: 'Unauthorized: Please login' }, { status: 401 });
+    }
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }

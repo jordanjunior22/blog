@@ -121,7 +121,7 @@ function Navigation() {
               href="/#subscribe"
               style={{
                 backgroundColor: "var(--cta-color)",
-                color: "var(--foreground)",
+                text: "var(--foreground)",
               }}
             />
 

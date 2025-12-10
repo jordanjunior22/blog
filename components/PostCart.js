@@ -32,20 +32,27 @@ export function PostCartSkeleton() {
 }
 
 function PostCart({ post }) {
+  // ✅ Default fallback image
+  const defaultImage = "https://skhcn.hatinh.gov.vn/storage/images.thumb.6884ae87-e99e-4995-8621-76a68fc0df7a.jpg";
+  
   return (
-    <div className=" md:w-full bg-gray-100 rounded-lg shadow-md overflow-hidden">
-      {/* Post Image */}
+    <div className="md:w-full bg-gray-100 rounded-lg shadow-md overflow-hidden">
+      {/* Post Image with fallback */}
       <img
-        src={post.coverImage}
+        src={post.coverImage || defaultImage}
         alt={post.title}
         className="w-full h-48 object-cover"
+        onError={(e) => {
+          // ✅ Fallback if image fails to load
+          e.target.src = defaultImage;
+        }}
       />
 
       <div className="p-4">
         {/* Post Meta */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
           <p className="bg-purple-200 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
-            {post.category?.name}
+            {post.category?.name || 'Uncategorized'}
           </p>
           <p>
             {new Date(post.createdAt).toLocaleDateString('en-US', {
@@ -57,14 +64,17 @@ function PostCart({ post }) {
         </div>
 
         {/* Post Title */}
-        <h2 className="text-lg font-bold text-gray-900"
-        style={{ fontFamily: 'var(--font-playfair)' }}>
+        <h2 
+          className="text-lg font-bold text-gray-900"
+          style={{ fontFamily: 'var(--font-playfair)' }}
+        >
           {post.title}
         </h2>
 
         {/* Post Excerpt */}
-        <p className="text-gray-700 text-sm mt-2"
-        style={{ fontFamily: 'var(--font-roboto)' }}
+        <p 
+          className="text-gray-700 text-sm mt-2"
+          style={{ fontFamily: 'var(--font-roboto)' }}
         >
           {post.content?.length > 200
             ? post.content.slice(0, 200) + '...'

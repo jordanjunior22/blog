@@ -1,15 +1,14 @@
 // app/api/admin/stats/route.js
-const { NextResponse } = require('next/server');
-const connectDB = require('@/utils/connectDB');
-const User = require('@/models/User');
-const Post = require('@/models/Post');
-const Tag = require('@/models/Tag');
-const Category = require('@/models/Category');
-const Comment = require('@/models/Comment');
-const jwt = require('jsonwebtoken');
+import { NextResponse } from 'next/server';
+import connectDB from '@/utils/connectDB';
+import User from '@/models/User';
+import Post from '@/models/Post';
+import Tag from '@/models/Tag';
+import Category from '@/models/Category';
+import Comment from '@/models/Comment';
 import verifyUser from '@/utils/VerifyUser';
 
-module.exports.GET = async function handler(request) {
+export async function GET(request) {
   await connectDB();
 
   try {
@@ -17,6 +16,7 @@ module.exports.GET = async function handler(request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
     const [users, posts, tags, categories, comments] = await Promise.all([
       User.countDocuments(),
       Post.countDocuments(),
@@ -30,4 +30,4 @@ module.exports.GET = async function handler(request) {
     console.error(err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
-};
+}

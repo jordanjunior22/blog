@@ -17,17 +17,22 @@ export function CartSkeleton() {
   );
 }
 
-
 function CategoriesCart({ title, description, imageUrl, link }) {
+  // ✅ Default fallback image
+  const defaultImage = "https://skhcn.hatinh.gov.vn/storage/images.thumb.6884ae87-e99e-4995-8621-76a68fc0df7a.jpg";
 
   return (
     <div className="p-4 rounded-xl hover:shadow-md transition-all duration-200 max-w-sm mx-auto">
-      {/* Image container */}
+      {/* Image container with fallback */}
       <div className="mb-4 h-40 w-full overflow-hidden rounded-lg">
         <img
-          src={imageUrl}
+          src={imageUrl || defaultImage}
           alt={`${title} visual representation`}
           className="object-cover w-full h-full"
+          onError={(e) => {
+            // ✅ Fallback if image fails to load
+            e.target.src = defaultImage;
+          }}
         />
       </div>
 

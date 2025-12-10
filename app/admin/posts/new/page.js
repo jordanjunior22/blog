@@ -2,8 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImagePlus, Loader2, ArrowLeft } from 'lucide-react';
-
+import { 
+  ImagePlus, 
+  Loader2, 
+  ArrowLeft, 
+  X, 
+  CheckCircle, 
+  XCircle,
+  FileText,
+  FolderOpen,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Sparkles
+} from 'lucide-react';
 
 // Helper to create URL-friendly slugs
 function slugify(text) {
@@ -11,8 +22,8 @@ function slugify(text) {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/[\s\W-]+/g, '-')    // spaces & non-word chars → hyphens
-    .replace(/^-+|-+$/g, '');     // trim leading/trailing hyphens
+    .replace(/[\s\W-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 export default function CreatePost() {
@@ -28,25 +39,31 @@ export default function CreatePost() {
   const [categories, setCategories] = useState([]);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
 
-  // Load categories
-useEffect(() => {
-  fetch('/api/categories')
-    .then((r) => r.json())
-    .then(data => {
-      if (Array.isArray(data)) {
-        setCategories(data);
-      } else if (Array.isArray(data.categories)) {
-        setCategories(data.categories);
-      } else {
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else if (Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else {
+          setCategories([]);
+        }
+      })
+      .catch(err => {
+        console.error(err);
         setCategories([]);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      setCategories([]);
-    });
-}, []);
+        showNotification('error', 'Failed to load categories');
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -60,11 +77,29 @@ useEffect(() => {
       }));
     } else if (name === 'coverImage' && files.length) {
       const file = files[0];
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showNotification('error', 'Image size must be less than 5MB');
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showNotification('error', 'Please select a valid image file');
+        return;
+      }
+      
       setForm((f) => ({ ...f, coverImage: file }));
       setPreview(URL.createObjectURL(file));
     } else {
       setForm((f) => ({ ...f, [name]: value }));
     }
+  };
+
+  const removeImage = () => {
+    setForm((f) => ({ ...f, coverImage: null }));
+    setPreview(null);
   };
 
   const handleSubmit = async (e) => {
@@ -74,6 +109,7 @@ useEffect(() => {
     try {
       let imageUrl = '';
       if (form.coverImage) {
+        showNotification('info', 'Uploading image...');
         const data = new FormData();
         data.append('image', form.coverImage);
 
@@ -83,6 +119,7 @@ useEffect(() => {
         imageUrl = json.url;
       }
 
+      showNotification('info', 'Creating post...');
       const payload = {
         title: form.title,
         content: form.content,
@@ -98,119 +135,222 @@ useEffect(() => {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Create failed');
 
-      router.push('/admin/posts');
+      showNotification('success', 'Post created successfully!');
+      setTimeout(() => {
+        router.push('/admin/posts');
+      }, 1500);
     } catch (err) {
-      alert(err.message);
+      showNotification('error', err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className='max-w-5xl mx-auto p-6'>
-      <button
-        onClick={() => router.back()}
-        className="flex items-center text-gray-700 hover:text-gray-900 mb-4"
-      >
-        <ArrowLeft className="w-5 h-5 mr-1" /> Back
-      </button>
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow space-y-6"
-      >
-        <h1 className="text-2xl font-bold text-gray-800">Create New Post</h1>
+    <div className='min-h-screen  p-2 sm:p-4 md:p-6'>
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-2 right-2 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-6 sm:py-4 rounded-lg sm:rounded-xl shadow-2xl animate-slide-in max-w-[calc(100vw-1rem)] sm:max-w-md ${
+          notification.type === 'success' ? 'bg-green-500' : 
+          notification.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+        } text-white`}>
+          {notification.type === 'success' && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
+          {notification.type === 'error' && <XCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
+          {notification.type === 'info' && <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin flex-shrink-0" />}
+          <span className="font-medium text-sm sm:text-base flex-1 min-w-0 truncate">{notification.message}</span>
+          <button 
+            onClick={() => setNotification(null)}
+            className="ml-1 sm:ml-2 hover:bg-white/20 rounded-lg p-1 transition-colors flex-shrink-0"
+          >
+            <X className="w-3 h-3 sm:w-4 sm:h-4" />
+          </button>
+        </div>
+      )}
 
-        {/* Title & Slug */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-medium mb-1">Title</label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded"
-            />
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+      `}</style>
+
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-4 sm:mb-6">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-3 sm:mb-4 group"
+          >
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium text-sm sm:text-base">Back to Posts</span>
+          </button>
+          
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="bg-gradient-to-br from-purple-600 to-blue-600 p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg">
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-playfair)' }}>
+              Create New Post
+            </h1>
           </div>
-          <div>
-            <label className="block font-medium mb-1">Slug</label>
-            <input
-              name="slug"
-              value={form.slug}
-              readOnly
-              className="w-full bg-gray-100 border p-2 rounded cursor-not-allowed"
-            />
-          </div>
+          <p className="text-gray-600 text-sm sm:text-base ml-10 sm:ml-[60px]">Share your thoughts with the world</p>
         </div>
 
-        {/* Category & Tags */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
+          {/* Title & Slug */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+                <span className="text-xs sm:text-sm">Title</span>
+              </label>
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+                placeholder="Enter post title..."
+                className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+                <span className="text-xs sm:text-sm">Slug (Auto-generated)</span>
+              </label>
+              <input
+                name="slug"
+                value={form.slug}
+                readOnly
+                className="w-full bg-gray-50 border border-gray-300 p-2 sm:p-3 rounded-lg text-sm sm:text-base cursor-not-allowed text-gray-600"
+              />
+            </div>
+          </div>
+
+          {/* Category */}
           <div>
-            <label className="block font-medium mb-1">Category</label>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <FolderOpen className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+              <span className="text-xs sm:text-sm">Category</span>
+            </label>
             <select
               name="category"
               value={form.category}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
             >
-              <option value="">Select category</option>
+              <option value="">Select a category</option>
               {Array.isArray(categories) && categories.map((c) => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Content */}
-        <div>
-          <label className="block font-medium mb-1">Content</label>
-          <textarea
-            name="content"
-            value={form.content}
-            onChange={handleChange}
-            rows={8}
-            required
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        {/* Cover Image Upload */}
-        <div>
-          <label className="block font-medium mb-2">Cover Image</label>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 border border-dashed border-gray-400 p-4 rounded cursor-pointer hover:bg-gray-50 transition">
-              <ImagePlus className="w-6 h-6 text-gray-600" />
-              <span className="text-sm text-gray-600">Upload Image</span>
-              <input
-                type="file"
-                name="coverImage"
-                accept="image/*"
-                onChange={handleChange}
-                className="hidden"
-              />
+          {/* Content */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+              <span className="text-xs sm:text-sm">Content</span>
             </label>
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="w-24 h-24 object-cover rounded border"
-              />
+            <textarea
+              name="content"
+              value={form.content}
+              onChange={handleChange}
+              rows={8}
+              required
+              placeholder="Write your post content here..."
+              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none"
+            />
+            <p className="text-xs text-gray-500 mt-1 sm:mt-2">
+              {form.content.length} characters
+            </p>
+          </div>
+
+          {/* Cover Image Upload */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+              <span className="text-xs sm:text-sm">Cover Image (Optional)</span>
+            </label>
+            
+            {!preview ? (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl p-4 sm:p-8 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                <div className="bg-purple-100 p-3 sm:p-4 rounded-full mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <ImagePlus className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 mb-1 text-center">
+                  Click to upload cover image
+                </span>
+                <span className="text-xs text-gray-500 text-center">
+                  PNG, JPG, GIF up to 5MB
+                </span>
+                <input
+                  type="file"
+                  name="coverImage"
+                  accept="image/*"
+                  onChange={handleChange}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div className="relative inline-block w-full">
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="w-full h-48 sm:h-64 object-cover rounded-lg sm:rounded-xl border-2 border-gray-200 shadow-lg"
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-red-500 hover:bg-red-600 text-white p-1.5 sm:p-2 rounded-lg shadow-lg transition-colors"
+                  title="Remove image"
+                >
+                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="animate-spin w-4 h-4" /> : null}
-          {loading ? 'Submitting...' : 'Create Post'}
-        </button>
-      </form>
+          {/* Submit Button */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-50 font-medium transition-colors text-sm sm:text-base"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full sm:flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 text-sm sm:text-base"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Creating Post...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Create Post</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-
   );
 }
