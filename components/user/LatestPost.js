@@ -47,9 +47,14 @@ export default function LatestPost() {
                     </div>
                 ) : posts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {posts.slice(0, 3).map(post => (
-                            <PostCart key={post._id} post={post} />
-                        ))}
+                        {posts
+                            .slice()
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // newest first
+                            .slice(0, 3)
+                            .map(post => (
+                                <PostCart key={post._id} post={post} />
+                            ))}
+
                     </div>
                 ) : (
                     <p>No featured posts available.</p>
