@@ -3,16 +3,15 @@ import connectDB from '@/utils/connectDB';
 import Post from '@/models/Post';
 
 export async function PATCH(req, context) {
-  // ✅ Always extract params synchronously before any `await`
-  const { id } = context.params;
-
-  await connectDB();
-
   try {
-    // ✅ Un-feature all other posts
+    // For Next.js 15, params might need to be awaited
+    const params = await context.params;
+    const { id } = params;
+
+    await connectDB();
+
     await Post.updateMany({ _id: { $ne: id } }, { $set: { featured: false } });
 
-    // ✅ Toggle the featured field directly, skip full validation
     const updated = await Post.findByIdAndUpdate(
       id,
       [{ $set: { featured: { $not: '$featured' } } }],

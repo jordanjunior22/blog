@@ -59,26 +59,40 @@ export default function AdminPosts() {
     fetchPosts();
   }, []);
 
-  const toggleFeatured = async (id) => {
-    try {
-      const res = await fetch(`/api/posts/${id}/toggle-featured`, {
-        method: 'PATCH',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to toggle featured');
-
-      setPosts((prev) =>
-        prev.map((p) => ({
-          ...p,
-          featured: p._id === id ? data.featured : false,
-        }))
-      );
-      
-      showNotification('success', data.featured ? 'Post featured successfully!' : 'Post unfeatured successfully!');
-    } catch (err) {
-      showNotification('error', err.message);
+const toggleFeatured = async (id) => {
+  try {
+    // Convert to string if it's an object
+    const postId = typeof id === 'object' ? id.toString() : id;
+    
+    console.log('Toggling featured for ID:', postId); // Debug
+    
+    const res = await fetch(`/api/posts/${postId}/toggle-featured`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to toggle featured');
     }
-  };
+
+    const data = await res.json();
+
+    setPosts((prev) =>
+      prev.map((p) => ({
+        ...p,
+        featured: String(p._id) === postId ? data.featured : false,
+      }))
+    );
+    
+    showNotification('success', data.featured ? 'Post featured successfully!' : 'Post unfeatured successfully!');
+  } catch (err) {
+    console.error('Toggle featured error:', err);
+    showNotification('error', err.message);
+  }
+};
 
   const handleDelete = async (id) => {
     setDeletingId(id);
