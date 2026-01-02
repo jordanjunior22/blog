@@ -131,12 +131,12 @@ export default function RootLayout({ children }) {
     <html lang="en" className={nunito.className}>
       <head>
         {/* Google AdSense Meta Tag */}
-        <meta name="google-adsense-account" content="ca-pub-2286994703571724" />
+        <meta name="google-adsense-account" content="ca-pub-5608206906100572" />
         <meta name="google-site-verification" content="Q2PIxRm99JlrLQTkSIRIh9V8ljwaSJyVq9JbC3pjYlg" />
         {/* Google AdSense Script */}
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2286994703571724"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5608206906100572"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
