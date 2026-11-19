@@ -6,7 +6,7 @@ export default function Hero() {
         <section
             className="relative w-full h-screen bg-cover bg-center flex items-center justify-center text-white"
             style={{
-                backgroundImage: "url('https://aeon.co/essays/how-lansana-keita-reinvigorated-african-philosophy')", // Replace with your image path
+                backgroundImage: "url('https://images.aeonmedia.co/images/f10f2dbe-2e7c-4c66-8eb0-03b02ebb4129/essay-par14971.jpg?width=3840&quality=75&format=auto')", // Replace with your image path
             }}
         >
             <div className="absolute inset-0 bg-black/70" /> {/* Dark overlay */}
