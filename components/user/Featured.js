@@ -97,11 +97,6 @@ export default function Featured() {
 
           <div>
             <p className="font-medium">{post.author?.name || 'Author'}</p>
-            {post.createdAt && (
-              <p className="text-sm text-gray-500">
-                Published on {new Date(post.createdAt).toLocaleDateString()}
-              </p>
-            )}
           </div>
         </div>
 
